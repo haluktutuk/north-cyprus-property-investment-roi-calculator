@@ -36,6 +36,16 @@ labels = {
     }
 }
 
+# User Inputs with default values
+property_price = st.number_input(labels[language]["property_price"], min_value=10000, value=165000, step=1000)
+annual_appreciation_rate = st.number_input(labels[language]["annual_appreciation_rate"], min_value=0.0, value=8.0, step=0.1) / 100
+holding_period_years = st.number_input(labels[language]["holding_period_years"], min_value=1, value=7, step=1)
+purchase_fees = st.number_input(labels[language]["purchase_fees"], min_value=0.0, value=6.0, step=0.1) / 100
+transfer_tax_rate = st.number_input(labels[language]["transfer_tax_rate"], min_value=0.0, value=6.0, step=0.1) / 100
+vat_rate = st.number_input(labels[language]["vat_rate"], min_value=0.0, value=5.0, step=0.1) / 100
+annual_maintenance_cost = st.number_input(labels[language]["annual_maintenance_cost"], min_value=0, value=1000, step=100)
+months_to_completion = st.number_input(labels[language]["months_to_completion"], min_value=1, value=30, step=1)
+
 def calculate_roi(
     property_price,
     annual_appreciation_rate,
@@ -79,10 +89,9 @@ def calculate_roi(
         annual_rental_income = round((property_value * 0.01) * 12, 1) if year > (months_to_completion // 12) else 0.0
         
         # Increase maintenance fees by 15% each year after completion
-        if year > (months_to_completion // 12):
-            annual_maintenance_cost *= 1.15
+        adjusted_maintenance_cost = annual_maintenance_cost * (1.15 ** (year - (months_to_completion // 12))) if year > (months_to_completion // 12) else 0.0
         
-        annual_maintenance_expense = round(annual_maintenance_cost, 1) if year > (months_to_completion // 12) else 0.0
+        annual_maintenance_expense = round(adjusted_maintenance_cost, 1) if year > (months_to_completion // 12) else 0.0
         
         annual_payment = round(min(post_completion_payment / 2, remaining_debt), 1) if remaining_debt > 0 else 0.0
         remaining_debt = round(remaining_debt - annual_payment, 1)
@@ -134,5 +143,5 @@ if st.button(labels[language]["calculate"]):
         language
     )
     st.dataframe(df)
-    st.subheader(f"{labels[language]["global_roi"]}: {global_roi}%")
-    st.subheader(f"{labels[language]["global_profit"]}{global_profit}")
+    st.subheader(f"{labels[language]['global_roi']}: {global_roi}%")
+    st.subheader(f"{labels[language]['global_profit']}{global_profit}")

@@ -1,6 +1,41 @@
 import pandas as pd
 import streamlit as st
 
+st.title("North Cyprus Real Estate ROI Calculator")
+
+# Language selection at the top
+language = st.radio("Select Language / Dil Seçimi", ("en", "tr"))
+
+# Define labels based on language selection
+labels = {
+    "en": {
+        "property_price": "Property Price (GBP)",
+        "annual_appreciation_rate": "Initial Annual Appreciation Rate (%)",
+        "holding_period_years": "Holding Period (Years)",
+        "purchase_fees": "Purchase Fees (%)",
+        "transfer_tax_rate": "Transfer Tax Rate (%)",
+        "vat_rate": "VAT Rate (%)",
+        "annual_maintenance_cost": "Annual Maintenance Cost (GBP)",
+        "months_to_completion": "Months to Completion Date",
+        "calculate": "Calculate ROI",
+        "global_roi": "Global ROI",
+        "global_profit": "Global Profit: £"
+    },
+    "tr": {
+        "property_price": "Mülk Fiyatı (GBP)",
+        "annual_appreciation_rate": "Başlangıç Yıllık Değer Artış Oranı (%)",
+        "holding_period_years": "Yatırım Süresi (Yıl)",
+        "purchase_fees": "Satın Alma Ücretleri (%)",
+        "transfer_tax_rate": "Tapu Harcı (%)",
+        "vat_rate": "KDV (%)",
+        "annual_maintenance_cost": "Yıllık Bakım Ücreti (GBP)",
+        "months_to_completion": "Tamamlanma Süresi (Ay)",
+        "calculate": "ROI Hesapla",
+        "global_roi": "Genel ROI",
+        "global_profit": "Genel Kar: £"
+    }
+}
+
 def calculate_roi(
     property_price,
     annual_appreciation_rate,
@@ -53,7 +88,6 @@ def calculate_roi(
         remaining_debt = round(remaining_debt - annual_payment, 1)
         cumulative_investment += annual_payment
         
-        # Remove initial investment from year 1 net profit calculation
         annual_net_profit = round((annual_rental_income - annual_maintenance_expense - annual_payment) + appreciation_amount, 1)
         
         cumulative_net_profit += annual_net_profit
@@ -82,25 +116,12 @@ def calculate_roi(
         columns=column_names[language])
     df_results = pd.concat([df_results, totals_row], ignore_index=True)
     
-    # Update global ROI to include appreciation amount in total net profit
     adjusted_total_net_profit = total_net_profit + total_appreciation
     global_roi = round((adjusted_total_net_profit / cumulative_investment) * 100, 1) if cumulative_investment > 0 else 0.0
     
     return df_results, global_roi, adjusted_total_net_profit
 
-st.title("North Cyprus Real Estate ROI Calculator")
-
-property_price = st.number_input("Property Price (GBP)", min_value=10000, value=165000, step=1000)
-annual_appreciation_rate = st.number_input("Initial Annual Appreciation Rate (%)", min_value=0.0, value=8.0, step=0.1) / 100
-holding_period_years = st.number_input("Holding Period (Years)", min_value=1, value=7, step=1)
-purchase_fees = st.number_input("Purchase Fees (%)", min_value=0.0, value=6.0, step=0.1) / 100
-transfer_tax_rate = st.number_input("Transfer Tax Rate (%)", min_value=0.0, value=6.0, step=0.1) / 100
-vat_rate = st.number_input("VAT Rate (%)", min_value=0.0, value=5.0, step=0.1) / 100
-annual_maintenance_cost = st.number_input("Annual Maintenance Cost (GBP)", min_value=0, value=1000, step=100)
-months_to_completion = st.number_input("Months to Completion Date", min_value=1, value=30, step=1)
-language = st.radio("Select Language", ("en", "tr"))
-
-if st.button("Calculate ROI"):
+if st.button(labels[language]["calculate"]):
     df, global_roi, global_profit = calculate_roi(
         property_price,
         annual_appreciation_rate,
@@ -113,5 +134,5 @@ if st.button("Calculate ROI"):
         language
     )
     st.dataframe(df)
-    st.subheader(f"Global ROI: {global_roi}%")
-    st.subheader(f"Global Profit: £{global_profit}")
+    st.subheader(f"{labels[language]["global_roi"]}: {global_roi}%")
+    st.subheader(f"{labels[language]["global_profit"]}{global_profit}")
